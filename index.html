@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" /> -->
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <title>Simple example on vuejs</title>
+    <style media="screen">
+        .listItem {
+            clear: none;
+            float: left;
+            margin: 0px 10px 25px 0px !important;
+        }
+        .chainInfo {
+            marting-top: 20px;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <h1>Simple example on vuejs</h1>
+    <div id="app">
+        <div class="row">
+            <div class="col-xs-4">
+                <input type="radio" id="numberType" group="type" value="Number" v-model="type" @click="onTranslatorTypeChanged()"/> <label for="numberType">Number</label>
+            </div>
+            <div class="col-xs-4">
+                <input type="radio" id="timeType" group="type" value="Time" v-model="type" @click="onTranslatorTypeChanged()"/> <label for="timeType">Time</label>
+            </div>
+        </div>
+        <div class="panel panel-default number-translator" v-if="type == 'Number'">
+            <div class="panel-heading">{{ type }} translator</div>
+            <div class="panel panel-body">
+                <div class="form-group">
+                    <label>Number</label>
+                    <input class="form-control" type="number" v-model="value" @input="translate()" />
+                </div>
+                <div class="form-group">
+                    <label>Translation</label>
+                    <label class="label label-default"> {{ translatedWord }} </label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default time-translator" v-if="type == 'Time'">
+            <div class="panel-heading">{{ type }} translator</div>
+            <div class="panel panel-body">
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-addon">Start</span>
+                            <input class="form-control" type="date" v-model="dateFrom" @input="translateDateDiff()" />
+                            <input class="form-control" type="time" v-model="timeFrom" @input="translateDateDiff()" />
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-addon">End</span>
+                            <input class="form-control" type="date" v-model="dateTo" @input="translateDateDiff()" />
+                            <input class="form-control" type="time" v-model="timeTo" @input="translateDateDiff()" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Translation</label>
+                    <label class="label label-default"> {{ translatedWord }} <span v-if="value && value < 0">ago</span></label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default magnitude-options">
+            <div class="panel-heading">Magnitude options</div>
+            <div class="panel panel-body">
+                <div class="form-group col-xs-6">
+                    <input type="checkbox" v-model="magnitudeOptions.TranslateMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                    <label>Magnitudes</label>
+                </div>
+                <div class="form-group col-xs-6">
+                    <input type="checkbox" v-model="magnitudeOptions.TranslateVeryLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                    <label>Very low order of magnitudes</label>
+                </div>
+                <div class="form-group col-xs-6">
+                    <input type="checkbox" v-model="magnitudeOptions.TranslateLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                    <label>Low order of magnitudes</label>
+                </div>
+                <div class="form-group col-xs-6">
+                    <input type="checkbox" v-model="magnitudeOptions.TranslateHighOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                    <label>High order of magnitudes</label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default translationChainInfo">
+            <div class="panel-heading">Translation chain info</div>
+            <div class="panel panel-body">
+                <div v-if="magnitudesList.length > 0" class="chainInfo magnitudes">
+                    <h4>Magnitudes</h4>
+                    <div class="magnitudesList col-xs-12">
+                        <h4 class="listItem" v-for="magnitude in magnitudesList">
+                            <label class="label label-default" v-bind:title="magnitude.translationBase.value">
+                                {{ magnitude.translationBase.word }}
+                            </label>
+                        </h4>
+                    </div>
+                </div>
+                <div v-if="orderOfMagnitudesList.length > 0" class="chainInfo orderOfMagnitudes">
+                    <h4>Order of magnitudes</h4>
+                    <div class="orderOfMagnitudesList col-xs-12">
+                        <h4 class="listItem" v-for="magnitude in orderOfMagnitudesList">
+                            <label class="label label-info" v-bind:title="magnitude.translationBase.value">
+                                {{ magnitude.translationBase.word }}
+                            </label>
+                        </h4>
+                    </div>
+                </div>
+                <div v-if="unitsList.length > 0" class="chainInfo units">
+                    <h4>Units</h4>
+                    <div class="unitsList col-xs-12">
+                        <h4 class="listItem" v-for="unit in unitsList">
+                            <label class="label label-primary" v-bind:title="unit.translationBase.value">
+                                {{ unit.translationBase.word }}
+                            </label>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="vaow.js"></script>
+    <!--
+    <script data-require="jquery@3.1.1" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    -->
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="vue.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
