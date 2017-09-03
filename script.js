@@ -9,6 +9,10 @@ function getTranslator(type, magnitudeOptions) {
     }
 }
 
+function getPascalCase(camelCaseText) {
+    return camelCaseText.charAt(0).toUpperCase() + camelCaseText.substr(1);
+}
+
 // Code goes here
 new Vue({
     el: '#app',
@@ -24,13 +28,13 @@ new Vue({
         timeTo: null
     },
     computed: {
-        magnitudesList: function() {
+        magnitudeList: function() {
             return this.getArrayForLinkedList(this.translator.translationChain.magnitudeChain);
         },
-        orderOfMagnitudesList: function() {
+        orderOfMagnitudeList: function() {
             return this.getArrayForLinkedList(this.translator.translationChain.orderOfMagnitudeChain);
         },
-        unitsList: function() {
+        unitList: function() {
             return this.getArrayForLinkedList(this.translator.translationChain.unitChain);
         }
     },
@@ -46,7 +50,9 @@ new Vue({
         },
         translate: function() {
             if (this.value) {
-                this.translatedWord = this.translator.translate(this.value);
+                this.translatedWord = this.translator.translate(Math.abs(this.value));
+            } else {
+                this.translatedWord = defaultTranslatedWord;
             }
         },
         translateDateDiff: function() {
@@ -56,7 +62,7 @@ new Vue({
                     to = this.dateTo + (this.timeTo ? 'T' + this.timeTo : '');
                 this.value = (new Date(to).getTime() - new Date(from).getTime()) / 1000;
                 if(this.value !== 0) {
-                    this.translatedWord = this.translator.translate(Math.abs(this.value));
+                    this.translatedWord = this.translator.translate(this.value);
                 }
             }
         },
@@ -68,7 +74,42 @@ new Vue({
                 item = item.nextElement;
             }
             return result;
+        },
+        removeChainItem: function(name, index) {
+            let list = this[name + 'List'];
+            if(list) {
+                list.splice(index, 1);
+                var chain = this.translator.translationChain[name + 'Chain']
+                chain.empty();
+                list.forEach(function(item) {
+                    console.log(name, 'add' + getPascalCase(name));
+                    this.translator.translationChain['add' + getPascalCase(name)](item.translationBase);
+                }, this);
+            }
+            this.translate();
+        },
+        resetTranslator: function() {
+            this.translator = getTranslator(this.type, this.magnitudeOptions);
+            this.translate();
         }
+
+        /*
+        var i = 0, prev = null, item = chain.head;
+                while(item !== null && i < index) {
+                    prev = item;
+                    item = item.nextElement;
+                    i++;
+                }
+                if(prev !== null) {
+                    if(item !== null) {
+                        prev.nextElement = item.nextElement;
+                    } else {
+                        prev.nextElement = null;
+                    }
+                } else {
+                    chain.head = item.nextElement;
+                }
+        */
     }
 
 });

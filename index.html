@@ -2,137 +2,184 @@
 <html>
 
 <head>
-    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" /> -->
-    <link rel="stylesheet" href="bootstrap.min.css" />
-    <title>Simple example on vuejs</title>
+    <!--<link rel="stylesheet" href="" /> -->
+    <link rel="stylesheet" href="vendor/semantic.min.css" />
+    <title>Value to words translator in vuejs</title>
     <style media="screen">
-        .listItem {
-            clear: none;
-            float: left;
-            margin: 0px 10px 25px 0px !important;
+        .chainList {
+            margin-top: 5px !important;
         }
+
+        .header {
+            margin-bottom: 5px !important;
+        }
+
+        .chainListItem {
+            margin-bottom: 5px !important;
+        }
+
         .chainInfo {
-            marting-top: 20px;
+            margin-top: 10px !important;
+        }
+        .centered {
+            text-align: center;
         }
     </style>
 </head>
 
-<body class="container">
-    <h1>Simple example on vuejs</h1>
-    <div id="app">
-        <div class="row">
-            <div class="col-xs-4">
-                <input type="radio" id="numberType" group="type" value="Number" v-model="type" @click="onTranslatorTypeChanged()"/> <label for="numberType">Number</label>
-            </div>
-            <div class="col-xs-4">
-                <input type="radio" id="timeType" group="type" value="Time" v-model="type" @click="onTranslatorTypeChanged()"/> <label for="timeType">Time</label>
-            </div>
-        </div>
-        <div class="panel panel-default number-translator" v-if="type == 'Number'">
-            <div class="panel-heading">{{ type }} translator</div>
-            <div class="panel panel-body">
-                <div class="form-group">
-                    <label>Number</label>
-                    <input class="form-control" type="number" v-model="value" @input="translate()" />
-                </div>
-                <div class="form-group">
-                    <label>Translation</label>
-                    <label class="label label-default"> {{ translatedWord }} </label>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default time-translator" v-if="type == 'Time'">
-            <div class="panel-heading">{{ type }} translator</div>
-            <div class="panel panel-body">
-                <div class="row form-group">
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-addon">Start</span>
-                            <input class="form-control" type="date" v-model="dateFrom" @input="translateDateDiff()" />
-                            <input class="form-control" type="time" v-model="timeFrom" @input="translateDateDiff()" />
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-addon">End</span>
-                            <input class="form-control" type="date" v-model="dateTo" @input="translateDateDiff()" />
-                            <input class="form-control" type="time" v-model="timeTo" @input="translateDateDiff()" />
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Translation</label>
-                    <label class="label label-default"> {{ translatedWord }} <span v-if="value && value < 0">ago</span></label>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default magnitude-options">
-            <div class="panel-heading">Magnitude options</div>
-            <div class="panel panel-body">
-                <div class="form-group col-xs-6">
-                    <input type="checkbox" v-model="magnitudeOptions.TranslateMagnitudes" @click="onMagnitudeOptionsChanged()" />
-                    <label>Magnitudes</label>
-                </div>
-                <div class="form-group col-xs-6">
-                    <input type="checkbox" v-model="magnitudeOptions.TranslateVeryLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
-                    <label>Very low order of magnitudes</label>
-                </div>
-                <div class="form-group col-xs-6">
-                    <input type="checkbox" v-model="magnitudeOptions.TranslateLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
-                    <label>Low order of magnitudes</label>
-                </div>
-                <div class="form-group col-xs-6">
-                    <input type="checkbox" v-model="magnitudeOptions.TranslateHighOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
-                    <label>High order of magnitudes</label>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default translationChainInfo">
-            <div class="panel-heading">Translation chain info</div>
-            <div class="panel panel-body">
-                <div v-if="magnitudesList.length > 0" class="chainInfo magnitudes">
-                    <h4>Magnitudes</h4>
-                    <div class="magnitudesList col-xs-12">
-                        <h4 class="listItem" v-for="magnitude in magnitudesList">
-                            <label class="label label-default" v-bind:title="magnitude.translationBase.value">
-                                {{ magnitude.translationBase.word }}
-                            </label>
-                        </h4>
-                    </div>
-                </div>
-                <div v-if="orderOfMagnitudesList.length > 0" class="chainInfo orderOfMagnitudes">
-                    <h4>Order of magnitudes</h4>
-                    <div class="orderOfMagnitudesList col-xs-12">
-                        <h4 class="listItem" v-for="magnitude in orderOfMagnitudesList">
-                            <label class="label label-info" v-bind:title="magnitude.translationBase.value">
-                                {{ magnitude.translationBase.word }}
-                            </label>
-                        </h4>
-                    </div>
-                </div>
-                <div v-if="unitsList.length > 0" class="chainInfo units">
-                    <h4>Units</h4>
-                    <div class="unitsList col-xs-12">
-                        <h4 class="listItem" v-for="unit in unitsList">
-                            <label class="label label-primary" v-bind:title="unit.translationBase.value">
-                                {{ unit.translationBase.word }}
-                            </label>
-                        </h4>
-                    </div>
-                </div>
-            </div>
+<body>
+    <div class="ui fourteen wide column container">
+        <div class="centered">
+            <h1>Value to words translator in vuejs</h1>
         </div>
     </div>
-    <script src="vaow.js"></script>
-    <!--
+    <div class="ui divider"></div>
+    <div class="ui padded grid centered">
+        <div class="fourteen wide column" id="app">
+            <div class="ui grid">
+                <div class="row">
+                    <div class="six wide column ui radio checkbox">
+                        <input type="radio" id="numberType" group="type" value="Number" v-model="type" @click="onTranslatorTypeChanged()" />                        <label for="numberType">Number</label>
+                    </div>
+                    <div class="six wide column ui radio checkbox">
+                        <input type="radio" id="timeType" group="type" value="Time" v-model="type" @click="onTranslatorTypeChanged()" />                        <label for="timeType">Time</label>
+                    </div>
+                </div>
+                <div class="sixteen wide column">
+                    <div class="ui divider"></div>
+                </div>
+                <div class="twelve wide column number-translator ui segment" v-if="type == 'Number'">
+                    <div class="ui grid">
+                        <div class="">
+                            <h3 class="">{{ type }} translator</h3>
+                        </div>
+                        <div class="row">
+                            <div class="sixteen column wide">
+                                <div class="ui fluid input">
+                                    <input type="number" v-model="value" @input="translate()" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="ten column wide ui blue label">
+                                {{ translatedWord }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="twelve wide column time-translator ui segment" v-if="type == 'Time'">
+                    <div class="ui grid">
+                        <div class="">
+                            <h3 class="">{{ type }} translator</h3>
+                        </div>
+                        <div class="row">
+                            <div class="eight wide column">
+                                <div class="ui input">
+                                    <span class="ui label">Start</span>
+                                    <input class="" type="date" v-model="dateFrom" @input="translateDateDiff()" />
+                                    <input class="" type="time" v-model="timeFrom" @input="translateDateDiff()" />
+                                </div>
+                            </div>
+                            <div class="eight wide column">
+                                <div class="ui input">
+                                    <span class="ui label">End</span>
+                                    <input class="" type="date" v-model="dateTo" @input="translateDateDiff()" />
+                                    <input class="" type="time" v-model="timeTo" @input="translateDateDiff()" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="ten column wide ui blue label">
+                                {{ translatedWord }} <span v-if="value < 0">ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="four wide column">
+                    <div class="row ui segment">
+                        <div class="sixteen wide column">
+                            <h3 class="header">Magnitude options</h3>
+                        </div>
+                        <div class="four wide column">
+                            <div class="ui checkbox">
+                                <input type="checkbox" v-model="magnitudeOptions.TranslateMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                                <label>Magnitudes</label>
+                            </div>
+                        </div>
+                        <div class="four wide column">
+                            <div class="ui checkbox">
+                                <input type="checkbox" v-model="magnitudeOptions.TranslateVeryLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()"
+                                />
+                                <label>Very low order of magnitudes</label>
+                            </div>
+                        </div>
+                        <div class="four wide column">
+                            <div class="ui checkbox">
+                                <input type="checkbox" v-model="magnitudeOptions.TranslateLowOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                                <label>Low order of magnitudes</label>
+                            </div>
+                        </div>
+                        <div class="four wide column">
+                            <div class="ui checkbox">
+                                <input type="checkbox" v-model="magnitudeOptions.TranslateHighOrderOfMagnitudes" @click="onMagnitudeOptionsChanged()" />
+                                <label>High order of magnitudes</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row ui segment">
+                    <div class="thirteen wide column">
+                        <h3 class="">Translation chain info</h3>
+                    </div>
+                    <div class="three wide column">
+                        <button @click="resetTranslator()" class="ui negative basic button right floated">Reset</button>
+                    </div>
+                    <template v-if="magnitudeList.length > 0">
+                        <div class="sixteen wide column chainInfo magnitudes">
+                            <h4>Magnitudes</h4>
+                        </div>
+                        <div class="chainList magnitudeOptionsList sixteen wide column">
+                            <div class="chainListItem ui yellow label" v-for="(magnitude, index) in magnitudeList" v-bind:title="magnitude.translationBase.value">
+                                {{ magnitude.translationBase.word }} <i class="delete icon" v-on:click="removeChainItem('magnitude', index)"></i>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-if="orderOfMagnitudeList.length > 0">
+                        <div class="sixteen wide column chainInfo orderOfMagnitudes">
+                            <h4>Order of magnitudes</h4>
+                        </div>
+                        <div class="chainList sixteen wide column">
+                            <div class="chainListItem ui teal label" v-for="(orderOfMagnitude, index) in orderOfMagnitudeList" v-bind:title="orderOfMagnitude.translationBase.value">
+                                {{ orderOfMagnitude.translationBase.word }} <i class="delete icon" v-on:click="removeChainItem('orderOfMagnitude', index)"></i>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-if="unitList.length > 0">
+                        <div class="sixteen wide column chainInfo units">
+                            <h4>Units</h4>
+                        </div>
+                        <div class="chainList sixteen wide column">
+                            <div class="chainListItem ui olive label" v-for="(unit, index) in unitList" v-bind:title="unit.translationBase.value">
+                                {{ unit.translationBase.word }} <i class="delete icon" v-on:click="removeChainItem('unit', index)"></i>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <script src="vendor/vaow.js"></script>
+
+        <!--
     <script data-require="jquery@3.1.1" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src=""></script>
     <script src="https://unpkg.com/vue"></script>
     -->
-    <script src="jquery.min.js"></script>
-    <script src="bootstrap.min.js"></script>
-    <script src="vue.js"></script>
-    <script src="script.js"></script>
+        <script src="vendor/jquery.min.js"></script>
+        <script src="vendor/semantic.min.js"></script>
+        <script src="vendor/vue.js"></script>
+        <script src="script.js"></script>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Playfair+Display:400italic' rel='stylesheet' type='text/css'
+        />
 </body>
 
 </html>

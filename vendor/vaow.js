@@ -431,8 +431,11 @@
 	    }, {
 	      key: 'copyFrom',
 	      value: function copyFrom(translationChain) {
+	        this.unitChain.empty();
 	        this.unitChain.copyFrom(translationChain.unitChain);
+	        this.magnitudeChain.empty();
 	        this.magnitudeChain.copyFrom(translationChain.magnitudeChain);
+	        this.orderOfMagnitudeChain.empty();
 	        this.orderOfMagnitudeChain.copyFrom(translationChain.orderOfMagnitudeChain);
 	      }
 	    }, {
@@ -596,6 +599,13 @@
 	      value: function appendToChain(chainElement) {
 	        this.tail.setNextElement(chainElement);
 	        this.tail = chainElement;
+	      }
+	    }, {
+	      key: 'empty',
+	      value: function empty() {
+	        var destroy = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+	        this.head = null;
 	      }
 	    }, {
 	      key: 'copyFrom',
@@ -1315,124 +1325,114 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translationChain) {
-	    'use strict';
+	  'use strict';
 
-	    Object.defineProperty(exports, '__esModule', {
-	        value: true
-	    });
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
 
-	    var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	    var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	  var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	    function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	    var RecursiveTranslationChain = (function (_TranslationChain) {
-	        _inherits(RecursiveTranslationChain, _TranslationChain);
+	  var RecursiveTranslationChain = (function (_TranslationChain) {
+	    _inherits(RecursiveTranslationChain, _TranslationChain);
 
-	        function RecursiveTranslationChain(underlyingChain) {
-	            _classCallCheck(this, RecursiveTranslationChain);
+	    function RecursiveTranslationChain(underlyingChain) {
+	      _classCallCheck(this, RecursiveTranslationChain);
 
-	            _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'constructor', this).call(this);
-	            this._underlyingChain = underlyingChain;
-	            this._isUnderlyingChainSetup = false;
+	      _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'constructor', this).call(this);
+	      this._underlyingChain = underlyingChain;
+	      this._isUnderlyingChainSetup = false;
+	    }
+
+	    _createClass(RecursiveTranslationChain, [{
+	      key: 'addUnit',
+	      value: function addUnit(unit) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addUnit', this).call(this, unit);
+	      }
+	    }, {
+	      key: 'addUnits',
+	      value: function addUnits(units) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addUnits', this).call(this, units);
+	      }
+	    }, {
+	      key: 'addMagnitude',
+	      value: function addMagnitude(magnitude) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addMagnitude', this).call(this, magnitude);
+	      }
+	    }, {
+	      key: 'addMagnitudes',
+	      value: function addMagnitudes(magnitudes) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addMagnitudes', this).call(this, magnitudes);
+	      }
+	    }, {
+	      key: 'addOrderOfMagnitude',
+	      value: function addOrderOfMagnitude(orderOfMagnitude) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addOrderOfMagnitude', this).call(this, orderOfMagnitude);
+	      }
+	    }, {
+	      key: 'addOrderOfMagnitudes',
+	      value: function addOrderOfMagnitudes(orderOfMagnitudes) {
+	        this._isUnderlyingChainSetup = false;
+	        _get(Object.getPrototypeOf(RecursiveTranslationChain.prototype), 'addOrderOfMagnitudes', this).call(this, orderOfMagnitudes);
+	      }
+	    }, {
+	      key: 'continueWithOrderOfMagnitudeTranslation',
+	      value: function continueWithOrderOfMagnitudeTranslation(value) {
+	        this._underlyingChain.continueWithOrderOfMagnitudeTranslation(value);
+	      }
+	    }, {
+	      key: 'initializeUnderlyingChain',
+	      value: function initializeUnderlyingChain() {
+	        if (!this._isUnderlyingChainSetup) {
+	          this._underlyingChain.copyFrom(this);
+	          this._isUnderlyingChainSetup = true;
+	        }
+	      }
+	    }, {
+	      key: 'translate',
+	      value: function translate(value) {
+	        var startFromMagnitude = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	        this.initializeUnderlyingChain();
+	        if (startFromMagnitude) {
+	          this._underlyingChain.reset(value);
+	          this._underlyingChain.continueWithMagnitudeTranslation(value);
+	        } else {
+	          this._underlyingChain.translate(value);
+	        }
+	        var initialResult = this._underlyingChain.result;
+	        var result = '';
+	        if (initialResult.getFactoredValue() >= 1 && initialResult.getFactoredValue() !== value) {
+	          var factoredValue = Math.floor(initialResult.getFactoredValue());
+	          initialResult.setFactoredValue(-1);
+	          result = this.translate(factoredValue, true) + ' ' + initialResult.toString();
+	        } else {
+	          result = initialResult.toString();
 	        }
 
-	        _createClass(RecursiveTranslationChain, [{
-	            key: 'continueWithOrderOfMagnitudeTranslation',
-	            value: function continueWithOrderOfMagnitudeTranslation(value) {
-	                this._underlyingChain.continueWithOrderOfMagnitudeTranslation(value);
-	            }
-	        }, {
-	            key: 'initializeUnderlyingChain',
-	            value: function initializeUnderlyingChain() {
-	                if (!this._isUnderlyingChainSetup) {
-	                    this._underlyingChain.copyFrom(this);
-	                    this._isUnderlyingChainSetup = true;
-	                }
-	            }
-	        }, {
-	            key: 'translate2',
-	            value: function translate2(value) {
-	                this.initializeUnderlyingChain();
-	                this._underlyingChain.translate(value);
-	                var initialResult = this._underlyingChain.result;
-	                if (initialResult.getFactoredValue() >= 1) {
-	                    var factoredValue = Math.floor(initialResult.getFactoredValue());
-	                    this._underlyingChain.reset(factoredValue);
-	                    this._underlyingChain.continueWithMagnitudeTranslation(factoredValue);
-	                    var factoredValueTranslation = this._underlyingChain.result;
-	                    var _iteratorNormalCompletion = true;
-	                    var _didIteratorError = false;
-	                    var _iteratorError = undefined;
+	        if (initialResult.getRemainder() >= 1) {
+	          return result + ' ' + this.translate(initialResult.getRemainder());
+	        } else {
+	          return result;
+	        }
+	      }
+	    }]);
 
-	                    try {
-	                        for (var _iterator = factoredValueTranslation.getMagnitudes()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                            var magnitude = _step.value;
+	    return RecursiveTranslationChain;
+	  })(_translationChain.TranslationChain);
 
-	                            initialResult.increaseByMagnitude(magnitude);
-	                        }
-	                    } catch (err) {
-	                        _didIteratorError = true;
-	                        _iteratorError = err;
-	                    } finally {
-	                        try {
-	                            if (!_iteratorNormalCompletion && _iterator['return']) {
-	                                _iterator['return']();
-	                            }
-	                        } finally {
-	                            if (_didIteratorError) {
-	                                throw _iteratorError;
-	                            }
-	                        }
-	                    }
-
-	                    value == 123222 && console.log('factoredValueTranslation', value, factoredValueTranslation, initialResult);
-	                }
-	                var result = initialResult.toString();
-	                //console.log('result', value, result, initialResult);
-	                if (initialResult.getRemainder() >= 1) {
-	                    return result + ' ' + this.translate(initialResult.getRemainder());
-	                } else {
-	                    return result;
-	                }
-	            }
-	        }, {
-	            key: 'translate',
-	            value: function translate(value) {
-	                var startFromMagnitude = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-	                this.initializeUnderlyingChain();
-	                if (startFromMagnitude) {
-	                    this._underlyingChain.reset(value);
-	                    this._underlyingChain.continueWithMagnitudeTranslation(value);
-	                } else {
-	                    this._underlyingChain.translate(value);
-	                }
-	                var initialResult = this._underlyingChain.result;
-	                var result = '';
-	                if (initialResult.getFactoredValue() >= 1 && initialResult.getFactoredValue() !== value) {
-	                    var factoredValue = Math.floor(initialResult.getFactoredValue());
-	                    initialResult.setFactoredValue(-1);
-	                    result = this.translate(factoredValue, true) + ' ' + initialResult.toString();
-	                } else {
-	                    result = initialResult.toString();
-	                }
-
-	                if (initialResult.getRemainder() >= 1) {
-	                    return result + ' ' + this.translate(initialResult.getRemainder());
-	                } else {
-	                    return result;
-	                }
-	            }
-	        }]);
-
-	        return RecursiveTranslationChain;
-	    })(_translationChain.TranslationChain);
-
-	    exports.RecursiveTranslationChain = RecursiveTranslationChain;
+	  exports.RecursiveTranslationChain = RecursiveTranslationChain;
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	//# sourceMappingURL=../../core/chain/recursive-translation-chain.js.map
 

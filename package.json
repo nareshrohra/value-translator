@@ -1,0 +1,24 @@
+{
+  "name": "value-translator",
+  "version": "1.0.0",
+  "description": "Word translator in vuejs. Uses vaow.js for word translation",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "live-server --port=27001"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nareshrohra/value-translator.git"
+  },
+  "keywords": [
+    "vaow.js",
+    "vuejs"
+  ],
+  "author": "Naresh Rohra",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nareshrohra/value-translator/issues"
+  },
+  "homepage": "https://github.com/nareshrohra/value-translator#readme"
+}
