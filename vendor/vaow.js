@@ -47,17 +47,17 @@
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports) {
 	  'use strict';
 
-	  !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(5), __webpack_require__(4), __webpack_require__(16), __webpack_require__(12), __webpack_require__(6), __webpack_require__(11), __webpack_require__(9), __webpack_require__(8), __webpack_require__(13), __webpack_require__(14), __webpack_require__(15), __webpack_require__(22), __webpack_require__(1), __webpack_require__(7), __webpack_require__(17), __webpack_require__(18), __webpack_require__(19), __webpack_require__(23), __webpack_require__(20), __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (
+	  !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(5), __webpack_require__(4), __webpack_require__(19), __webpack_require__(12), __webpack_require__(6), __webpack_require__(11), __webpack_require__(9), __webpack_require__(8), __webpack_require__(13), __webpack_require__(14), __webpack_require__(15), __webpack_require__(16), __webpack_require__(18), __webpack_require__(24), __webpack_require__(1), __webpack_require__(7), __webpack_require__(20), __webpack_require__(17), __webpack_require__(21), __webpack_require__(25), __webpack_require__(26), __webpack_require__(27), __webpack_require__(22), __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (
 	  //chain
 	  chain, translationChain, circularTranslationChain, recursiveTranslationChain, translationChainElement, magnitudeTranslationChainElement,
 	  //formatters
 	  numberFormatter, translationResultFormatter,
 	  //constants
-	  orderOfMagnitudes, tens, numberUnits, timeUnits,
+	  orderOfMagnitudes, tens, numberUnits, timeUnits, distanceUnits, weightUnits,
 	  //types
 	  magnitude, translationResult, translatorOptions, unit,
 	  //translators
-	  numberTranslator, timeTranslator, translatorBase,
+	  numberTranslator, timeTranslator, distanceTranslator, weightTranslator, translatorBase,
 	  //util
 	  validator,
 	  //locale
@@ -79,8 +79,10 @@
 	          Tens: tens.Tens,
 	          Units: numberUnits.Units
 	        },
-	        time: {
-	          Units: timeUnits.Units
+	        units: {
+	          Time: timeUnits.Time,
+	          Distance: distanceUnits.Distance,
+	          Weight: weightUnits.Weight
 	        }
 	      },
 
@@ -98,6 +100,8 @@
 
 	      NumberTranslator: numberTranslator.NumberTranslator,
 	      TimeTranslator: timeTranslator.TimeTranslator,
+	      DistanceTranslator: distanceTranslator.DistanceTranslator,
+	      WeightTranslator: weightTranslator.WeightTranslator,
 	      TranslatorBase: translatorBase.TranslatorBase,
 
 	      util: {
@@ -335,7 +339,25 @@
 	    Months: 'months',
 	    Years: 'years',
 	    Decades: 'decades',
-	    Centuries: 'centuries'
+	    Centuries: 'centuries',
+	    Millenium: 'millenium'
+	  };
+
+	  Locale.Weight = {
+	    Milligrams: 'milligrams',
+	    Grams: 'grams',
+	    Kilograms: 'kilograms',
+	    Quintals: 'quintals',
+	    Tons: 'tons'
+	  };
+
+	  Locale.Distance = {
+	    Millimeters: 'millimeters',
+	    Centimeters: 'centimeters',
+	    Inches: 'nches',
+	    Feets: 'feets',
+	    Meters: 'meters',
+	    Kilometers: 'kilometers'
 	  };
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	//# sourceMappingURL=locale.js.map
@@ -468,15 +490,20 @@
 	      key: 'continueWithUnitTranslation',
 	      value: function continueWithUnitTranslation(value) {
 	        if (this.unitChain.isNotEmpty()) {
-	          var result = this.unitChain.translate(value);
+	          var result = this.unitChain.translate(value),
+	              remainderFromUnitTranslation = 0;
 	          if (!result.isUnderflow()) {
 	            this.result.applyElementTranslationResultAsUnit(result);
+	            remainderFromUnitTranslation = result.getRemainder();
 	          } else {
 	            this.result.applyElementTranslationResult(result);
 	            this.continueWithMagnitudeTranslation(this.result.getFactoredValue());
 	          }
 	          if (result.isOverflow()) {
 	            this.continueWithMagnitudeTranslation(this.result.getFactoredValue());
+	            if (remainderFromUnitTranslation > 0) {
+	              this.result.setRemainder(remainderFromUnitTranslation);
+	            }
 	          }
 	        } else {
 	          this.continueWithMagnitudeTranslation(this.result.getFactoredValue());
@@ -889,13 +916,11 @@
 	      key: 'applyElementTranslationResultAsOrderOfMagnitude',
 	      value: function applyElementTranslationResultAsOrderOfMagnitude(elementResult) {
 	        if (_utilValidator.Validator.isDefinedAndNotNull(elementResult)) {
-	          //elementResult.getRemainder() === 3 && console.log('applyElementTranslationResultAsOrderOfMagnitude', 'before', elementResult);
 	          this.applyElementTranslationResult(elementResult);
 	          this.increaseByOrderOfMagnitude(elementResult.getWord());
-	          //elementResult.getRemainder() === 3 && console.log('applyElementTranslationResultAsOrderOfMagnitude', 'after', elementResult);
 	        } else {
-	            throw _locale.Locale.Error.InvalidArgElementResult;
-	          }
+	          throw _locale.Locale.Error.InvalidArgElementResult;
+	        }
 	      }
 	    }, {
 	      key: 'toString',
@@ -1045,7 +1070,6 @@
 	              magnitudes = this.getMagnitudesString(translationResult),
 	              orderOfMagnitudes = this.getOrderOfMagnitudesString(translationResult),
 	              unit = this.getUnitString(translationResult);
-
 	          return [magnitudes === '' ? digitValue : '', magnitudes, orderOfMagnitudes, unit].filter(function (val) {
 	            return val;
 	          }).join(' ');
@@ -1413,16 +1437,19 @@
 	        }
 	        var initialResult = this._underlyingChain.result;
 	        var result = '';
-	        if (initialResult.getFactoredValue() >= 1 && initialResult.getFactoredValue() !== value) {
+
+	        if (initialResult.getFactoredValue() >= 1 && (initialResult.getFactoredValue() !== value || startFromMagnitude == false)) {
 	          var factoredValue = Math.floor(initialResult.getFactoredValue());
 	          initialResult.setFactoredValue(-1);
-	          result = this.translate(factoredValue, true) + ' ' + initialResult.toString();
+	          var factoredValueTranslation = this.translate(factoredValue, true);
+	          result = (factoredValueTranslation ? factoredValueTranslation.trim() + ' ' : '') + initialResult.toString();
 	        } else {
 	          result = initialResult.toString();
 	        }
 
 	        if (initialResult.getRemainder() >= 1) {
-	          return result + ' ' + this.translate(initialResult.getRemainder());
+	          var remainderValueTranslation = this.translate(initialResult.getRemainder());
+	          return result + (remainderValueTranslation ? ' ' + remainderValueTranslation.trim() : '');
 	        } else {
 	          return result;
 	        }
@@ -1558,6 +1585,124 @@
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(3), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _locale, _typesUnit) {
+	  'use strict';
+
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
+
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  var Time = function Time() {
+	    _classCallCheck(this, Time);
+	  };
+
+	  exports.Time = Time;
+
+	  Time.Second = new _typesUnit.Unit(_locale.Locale.Time.Seconds, 0);
+	  Time.Minute = new _typesUnit.Unit(_locale.Locale.Time.Minutes, 60);
+	  Time.Hour = new _typesUnit.Unit(_locale.Locale.Time.Hours, Time.Minute.getValue() * 60);
+	  Time.Day = new _typesUnit.Unit(_locale.Locale.Time.Days, Time.Hour.getValue() * 24);
+	  Time.Month = new _typesUnit.Unit(_locale.Locale.Time.Months, Time.Day.getValue() * 30.43);
+	  Time.Year = new _typesUnit.Unit(_locale.Locale.Time.Years, Time.Day.getValue() * 365.24);
+	  Time.Decade = new _typesUnit.Unit(_locale.Locale.Time.Decades, Time.Year.getValue() * 10);
+	  Time.Century = new _typesUnit.Unit(_locale.Locale.Time.Centuries, Time.Year.getValue() * 100);
+	  Time.Millenium = new _typesUnit.Unit(_locale.Locale.Time.Millenium, Time.Century.getValue() * 10);
+
+	  Time.Default = [Time.Second, Time.Minute, Time.Hour, Time.Day, Time.Month, Time.Year, Time.Century];
+
+	  Time.All = [Time.Second, Time.Minute, Time.Hour, Time.Day, Time.Month, Time.Year, Time.Decade, Time.Century, Time.Millenium];
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	//# sourceMappingURL=../../../core/constants/units/time.js.map
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _utilValidator, _locale) {
+	  'use strict';
+
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
+
+	  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  var Unit = (function () {
+	    function Unit(word, value) {
+	      _classCallCheck(this, Unit);
+
+	      this.validate(word, value);
+
+	      this.word = word;
+	      this.value = value;
+	    }
+
+	    _createClass(Unit, [{
+	      key: 'validate',
+	      value: function validate(word, value) {
+	        if (!_utilValidator.Validator.isDefinedAndNotNull(word)) throw _locale.Locale.Error.InvalidArgWord;
+
+	        if (!_utilValidator.Validator.isPositiveNumber(value)) throw _locale.Locale.Error.InvalidArgPositiveNumberValue;
+	      }
+	    }, {
+	      key: 'getWord',
+	      value: function getWord() {
+	        return this.word;
+	      }
+	    }, {
+	      key: 'getValue',
+	      value: function getValue() {
+	        return this.value;
+	      }
+	    }]);
+
+	    return Unit;
+	  })();
+
+	  exports.Unit = Unit;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	//# sourceMappingURL=../../core/types/unit.js.map
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(3), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _locale, _typesUnit) {
+	  'use strict';
+
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
+
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  var Distance = function Distance() {
+	    _classCallCheck(this, Distance);
+	  };
+
+	  exports.Distance = Distance;
+
+	  Distance.Millimeter = new _typesUnit.Unit(_locale.Locale.Distance.Millimeters, 0);
+	  Distance.Centimeter = new _typesUnit.Unit(_locale.Locale.Distance.Centimeters, 10);
+	  Distance.Inch = new _typesUnit.Unit(_locale.Locale.Distance.Inches, 25.4);
+	  Distance.Feet = new _typesUnit.Unit(_locale.Locale.Distance.Feets, 304.8);
+	  Distance.Meter = new _typesUnit.Unit(_locale.Locale.Distance.Meters, 1000);
+	  Distance.Kilometer = new _typesUnit.Unit(_locale.Locale.Distance.Kilometers, Distance.Meter.getValue() * 1000);
+
+	  Distance.Default = [Distance.Millimeter, Distance.Meter, Distance.Kilometer];
+
+	  Distance.All = [Distance.Millimeter, Distance.Centimeter, Distance.Inch, Distance.Feet, Distance.Meter, Distance.Kilometer];
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	//# sourceMappingURL=../../../core/constants/units/distance.js.map
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translationChain) {
 	  'use strict';
 
@@ -1607,7 +1752,7 @@
 	//# sourceMappingURL=../../core/chain/circular-translation-chain.js.map
 
 /***/ },
-/* 17 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _utilValidator, _locale) {
@@ -1671,9 +1816,12 @@
 
 	  exports.TranslatorOptions = TranslatorOptions;
 
-	  TranslatorOptions.Type = {};
-	  TranslatorOptions.Type.Number = 'number';
-	  TranslatorOptions.Type.Time = 'time';
+	  TranslatorOptions.Type = {
+	    Number: 'number',
+	    Time: 'time',
+	    Weight: 'weight',
+	    Distance: 'distance'
+	  };
 
 	  var MagnitudeOptions = (function () {
 	    function MagnitudeOptions() {
@@ -1728,61 +1876,10 @@
 	//# sourceMappingURL=../../core/types/translator-options.js.map
 
 /***/ },
-/* 18 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _utilValidator, _locale) {
-	  'use strict';
-
-	  Object.defineProperty(exports, '__esModule', {
-	    value: true
-	  });
-
-	  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	  var Unit = (function () {
-	    function Unit(word, value) {
-	      _classCallCheck(this, Unit);
-
-	      this.validate(word, value);
-
-	      this.word = word;
-	      this.value = value;
-	    }
-
-	    _createClass(Unit, [{
-	      key: 'validate',
-	      value: function validate(word, value) {
-	        if (!_utilValidator.Validator.isDefinedAndNotNull(word)) throw _locale.Locale.Error.InvalidArgWord;
-
-	        if (!_utilValidator.Validator.isPositiveNumber(value)) throw _locale.Locale.Error.InvalidArgPositiveNumberValue;
-	      }
-	    }, {
-	      key: 'getWord',
-	      value: function getWord() {
-	        return this.word;
-	      }
-	    }, {
-	      key: 'getValue',
-	      value: function getValue() {
-	        return this.value;
-	      }
-	    }]);
-
-	    return Unit;
-	  })();
-
-	  exports.Unit = Unit;
-	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	//# sourceMappingURL=../../core/types/unit.js.map
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(20), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(22), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
 	  'use strict';
 
 	  Object.defineProperty(exports, '__esModule', {
@@ -1816,10 +1913,10 @@
 	//# sourceMappingURL=../translators/number-translator.js.map
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(17), __webpack_require__(21)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _coreTypesTranslatorOptions, _coreChainTranslationChainBuilder) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(20), __webpack_require__(23)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _coreTypesTranslatorOptions, _coreChainTranslationChainBuilder) {
 	  'use strict';
 
 	  Object.defineProperty(exports, '__esModule', {
@@ -1870,10 +1967,10 @@
 	//# sourceMappingURL=../translators/translator-base.js.map
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(15), __webpack_require__(14), __webpack_require__(13), __webpack_require__(22), __webpack_require__(16), __webpack_require__(12), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _constantsNumberUnits, _constantsNumberTens, _constantsNumberOrderOfMagnitudes, _constantsTimeUnits, _circularTranslationChain, _recursiveTranslationChain, _typesTranslatorOptions) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(15), __webpack_require__(14), __webpack_require__(13), __webpack_require__(16), __webpack_require__(18), __webpack_require__(24), __webpack_require__(19), __webpack_require__(12), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _utilValidator, _constantsNumberUnits, _constantsNumberTens, _constantsNumberOrderOfMagnitudes, _constantsUnitsTime, _constantsUnitsDistance, _constantsUnitsWeight, _circularTranslationChain, _recursiveTranslationChain, _typesTranslatorOptions) {
 	  'use strict';
 
 	  Object.defineProperty(exports, '__esModule', {
@@ -1883,6 +1980,12 @@
 	  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  var TypedUnits = {
+	    time: _constantsUnitsTime.Time,
+	    weight: _constantsUnitsWeight.Weight,
+	    distance: _constantsUnitsDistance.Distance
+	  };
 
 	  var TranslationChainBuilder = (function () {
 	    function TranslationChainBuilder() {
@@ -1896,18 +1999,13 @@
 	      value: function build(options) {
 	        this._translationChain = options.TranslateRecursively ? new _recursiveTranslationChain.RecursiveTranslationChain(new _circularTranslationChain.CircularTranslationChain()) : new _circularTranslationChain.CircularTranslationChain();
 
-	        if (options.Type === _typesTranslatorOptions.TranslatorOptions.Type.Time) {
-	          this._addTimeChainElements();
+	        if (_utilValidator.Validator.isDefinedAndNotNull(TypedUnits[options.Type])) {
+	          this._translationChain.addUnits(TypedUnits[options.Type].Default);
 	        }
 
 	        this._addMagnitudesAndOrder(options.MagnitudeOptions);
 
 	        return this._translationChain;
-	      }
-	    }, {
-	      key: '_addTimeChainElements',
-	      value: function _addTimeChainElements() {
-	        this._translationChain.addUnits(_constantsTimeUnits.Time.All);
 	      }
 	    }, {
 	      key: '_addMagnitudesAndOrder',
@@ -1959,10 +2057,10 @@
 	//# sourceMappingURL=../../core/chain/translation-chain-builder.js.map
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(3), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _locale, _typesUnit) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(3), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _locale, _typesUnit) {
 	  'use strict';
 
 	  Object.defineProperty(exports, '__esModule', {
@@ -1971,30 +2069,29 @@
 
 	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	  var Time = function Time() {
-	    _classCallCheck(this, Time);
+	  var Weight = function Weight() {
+	    _classCallCheck(this, Weight);
 	  };
 
-	  exports.Time = Time;
+	  exports.Weight = Weight;
 
-	  Time.Second = new _typesUnit.Unit(_locale.Locale.Time.Seconds, 0);
-	  Time.Minute = new _typesUnit.Unit(_locale.Locale.Time.Minutes, 60);
-	  Time.Hour = new _typesUnit.Unit(_locale.Locale.Time.Hours, Time.Minute.getValue() * 60);
-	  Time.Day = new _typesUnit.Unit(_locale.Locale.Time.Days, Time.Hour.getValue() * 24);
-	  Time.Month = new _typesUnit.Unit(_locale.Locale.Time.Months, Time.Day.getValue() * 30.43);
-	  Time.Year = new _typesUnit.Unit(_locale.Locale.Time.Years, Time.Day.getValue() * 365.24);
-	  Time.Decade = new _typesUnit.Unit(_locale.Locale.Time.Decades, Time.Year.getValue() * 10);
-	  Time.Century = new _typesUnit.Unit(_locale.Locale.Time.Centuries, Time.Year.getValue() * 100);
+	  Weight.Milligram = new _typesUnit.Unit(_locale.Locale.Weight.Milligrams, 0);
+	  Weight.Gram = new _typesUnit.Unit(_locale.Locale.Weight.Grams, 1000);
+	  Weight.Kilogram = new _typesUnit.Unit(_locale.Locale.Weight.Kilograms, Weight.Gram.getValue() * 1000);
+	  Weight.Quintal = new _typesUnit.Unit(_locale.Locale.Weight.Quintals, Weight.Kilogram.getValue() * 100);
+	  Weight.Ton = new _typesUnit.Unit(_locale.Locale.Weight.Tons, Weight.Kilogram.getValue() * 1000);
 
-	  Time.All = [Time.Second, Time.Minute, Time.Hour, Time.Day, Time.Month, Time.Year, Time.Decade, Time.Century];
+	  Weight.Default = [Weight.Milligram, Weight.Gram, Weight.Kilogram];
+
+	  Weight.All = [Weight.Milligram, Weight.Gram, Weight.Kilogram, Weight.Quintal, Weight.Ton];
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	//# sourceMappingURL=../../../core/constants/time/units.js.map
+	//# sourceMappingURL=../../../core/constants/units/weight.js.map
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(20), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(22), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
 	  'use strict';
 
 	  Object.defineProperty(exports, '__esModule', {
@@ -2026,6 +2123,80 @@
 	  exports.TimeTranslator = TimeTranslator;
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	//# sourceMappingURL=../translators/time-translator.js.map
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(22), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
+	  'use strict';
+
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
+
+	  var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	  var DistanceTranslator = (function (_TranslatorBase) {
+	    _inherits(DistanceTranslator, _TranslatorBase);
+
+	    function DistanceTranslator(magnitudeOptions) {
+	      var translateRecursively = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	      _classCallCheck(this, DistanceTranslator);
+
+	      _get(Object.getPrototypeOf(DistanceTranslator.prototype), 'constructor', this).call(this, magnitudeOptions, translateRecursively);
+	      this._setType(_coreTypesTranslatorOptions.TranslatorOptions.Type.Distance);
+	      this.constructChain();
+	    }
+
+	    return DistanceTranslator;
+	  })(_translatorBase.TranslatorBase);
+
+	  exports.DistanceTranslator = DistanceTranslator;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	//# sourceMappingURL=../translators/distance-translator.js.map
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(22), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, _translatorBase, _coreTypesTranslatorOptions) {
+	  'use strict';
+
+	  Object.defineProperty(exports, '__esModule', {
+	    value: true
+	  });
+
+	  var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	  var WeightTranslator = (function (_TranslatorBase) {
+	    _inherits(WeightTranslator, _TranslatorBase);
+
+	    function WeightTranslator(magnitudeOptions) {
+	      var translateRecursively = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	      _classCallCheck(this, WeightTranslator);
+
+	      _get(Object.getPrototypeOf(WeightTranslator.prototype), 'constructor', this).call(this, magnitudeOptions, translateRecursively);
+	      this._setType(_coreTypesTranslatorOptions.TranslatorOptions.Type.Weight);
+	      this.constructChain();
+	    }
+
+	    return WeightTranslator;
+	  })(_translatorBase.TranslatorBase);
+
+	  exports.WeightTranslator = WeightTranslator;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	//# sourceMappingURL=../translators/weight-translator.js.map
 
 /***/ }
 /******/ ]);

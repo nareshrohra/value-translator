@@ -1,5 +1,8 @@
 //create an instance of TranslatorOptions
-var defaultMagnitudeOptions = new vaow.types.MagnitudeOptions(), defaultTranslatorType = 'Number', defaultTranslatedWord = 'Wiating for value to be inputted';
+var defaultMagnitudeOptions = new vaow.types.MagnitudeOptions(), 
+    translatorTypes = ['Number', 'Time', 'Distance', 'Weight'],
+    defaultTranslatorType = 'Number', 
+    defaultTranslatedWord = 'Wiating for value to be inputted';
 
 defaultMagnitudeOptions.TranslateMagnitudes = defaultMagnitudeOptions.TranslateVeryLowOrderOfMagnitudes = true;
 
@@ -18,14 +21,16 @@ new Vue({
     el: '#app',
     data: {
         value: 0,
+        types: translatorTypes,
         magnitudeOptions: defaultMagnitudeOptions,
         translatedWord: defaultTranslatedWord,
-        type: defaultTranslatorType,
+        selectedType: defaultTranslatorType,
         translator: getTranslator(defaultTranslatorType, defaultMagnitudeOptions),
         dateFrom: null,
         dateTo: null,
         timeFrom: null,
-        timeTo: null
+        timeTo: null,
+        selectedInputUnit: null
     },
     computed: {
         magnitudeList: function() {
@@ -36,21 +41,34 @@ new Vue({
         },
         unitList: function() {
             return this.getArrayForLinkedList(this.translator.translationChain.unitChain);
+        },
+        availableUnitsForTranslator: function() {
+            if(vaow.constants.units[this.selectedType] && vaow.constants.units[this.selectedType].All) {
+                setTimeout(function() { $('.inputUnitDropdown').dropdown(); }, 100);
+                return vaow.constants.units[this.selectedType].All;
+            } else {
+                return [];
+            }
         }
     },
     methods: {
         onMagnitudeOptionsChanged: function() {
-            this.translator = getTranslator(this.type, this.magnitudeOptions);
+            this.translator = getTranslator(this.selectedType, this.magnitudeOptions);
             this.translate();
         },
         onTranslatorTypeChanged: function() {
             this.value = 0;
             this.translatedWord = defaultTranslatedWord;
-            this.translator = getTranslator(this.type, this.magnitudeOptions);
+            this.selectedInputUnit = null;
+            this.translator = getTranslator(this.selectedType, this.magnitudeOptions);
         },
         translate: function() {
             if (this.value) {
-                this.translatedWord = this.translator.translate(Math.abs(this.value));
+                let valueToTranslate = Math.abs(this.value);
+                if(this.selectedInputUnit > 0) {
+                    valueToTranslate *= this.selectedInputUnit;
+                }
+                this.translatedWord = this.translator.translate(valueToTranslate);
             } else {
                 this.translatedWord = defaultTranslatedWord;
             }
@@ -61,9 +79,7 @@ new Vue({
                 var from = this.dateFrom + (this.timeFrom ? 'T' + this.timeFrom : ''),
                     to = this.dateTo + (this.timeTo ? 'T' + this.timeTo : '');
                 this.value = (new Date(to).getTime() - new Date(from).getTime()) / 1000;
-                if(this.value !== 0) {
-                    this.translatedWord = this.translator.translate(this.value);
-                }
+                this.translate();
             }
         },
         getArrayForLinkedList: function(linkedList) {
@@ -89,27 +105,9 @@ new Vue({
             this.translate();
         },
         resetTranslator: function() {
-            this.translator = getTranslator(this.type, this.magnitudeOptions);
+            this.translator = getTranslator(this.selectedType, this.magnitudeOptions);
             this.translate();
         }
-
-        /*
-        var i = 0, prev = null, item = chain.head;
-                while(item !== null && i < index) {
-                    prev = item;
-                    item = item.nextElement;
-                    i++;
-                }
-                if(prev !== null) {
-                    if(item !== null) {
-                        prev.nextElement = item.nextElement;
-                    } else {
-                        prev.nextElement = null;
-                    }
-                } else {
-                    chain.head = item.nextElement;
-                }
-        */
     }
 
 });
