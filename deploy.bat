@@ -1,2 +1,1 @@
-bitsadmin.exe /transfer "powershell-ftp-upload" "https://gist.githubusercontent.com/nareshrohra/25d317496fbdb54560ec604c458e4428/raw/bea26dae00d7314aaf42eaf9c909fef136f66d05/upload-files-with-ftp.ps1" upload-files-with-ftp.ps1
-#powershell -file upload-files-with-ftp.ps1 -localFiles "script.js,index.html" -remotePath "value-translator"
+powershell -file publish.ps1 -localFiles "script.js,index.html" -remotePath "value-translator"
